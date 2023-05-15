@@ -6,12 +6,18 @@ class UsersController < ApplicationController
     json_response(@users, 200)
   end
 
+  def login
+    token = AuthenticateUser.new(user_params[:email], user_params[:password]).call
+    data = JsonWebToken.decode(token)
+    json_response(data.merge(token: token), 200)
+  end
+
   def create
     @user = User.new(user_params)
     if @user.save
       json_response(@user, 200)
     else
-      json_response('Gagal membuat user')
+      json_response('Gagal membuat user', 400)
     end
   end
 
@@ -33,7 +39,11 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
   end
 
+  def set_auth
+    @check_user = AuthorizeApiRequest.new(request.headers['Authorization']).call
+  end
+
   def user_params
-    params.require(:user).permit(:name, :email, :password_digest, :photo_url)
+    params.require(:user).permit(:name, :email, :password, :password_confirmation, :photo_url)
   end
 end
