@@ -1,5 +1,6 @@
 class UsersController < ApplicationController
   before_action :set_user, only: [:show, :destroy]
+  skip_before_action :authorize_request, only: [:login, :create]
   
   def index
     @users = User.all
@@ -26,7 +27,7 @@ class UsersController < ApplicationController
   end
 
   def destroy
-    if @user.destroy
+    if @user.sender.destroy
       json_response('Berhasil menghapus user', 200)
     else
       json_response(@user, 400)
@@ -37,10 +38,6 @@ class UsersController < ApplicationController
 
   def set_user
     @user = User.find(params[:id])
-  end
-
-  def set_auth
-    @check_user = AuthorizeApiRequest.new(request.headers['Authorization']).call
   end
 
   def user_params

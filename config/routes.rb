@@ -3,4 +3,8 @@ Rails.application.routes.draw do
   resources :users
   
   post '/login', to: 'users#login'
+
+  resources :conversations, only: [:index, :create, :show] do
+    resources :messages, only: [:index, :create, :show]
+  end
 end
